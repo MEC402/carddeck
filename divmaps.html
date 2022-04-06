@@ -13,7 +13,8 @@
 <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
 <script >
 
-var walloffset;
+var wallxoffset;
+var wallyoffset;
 
 function VideoDone(element)
 {
@@ -67,14 +68,17 @@ function showcontents(element)
     element.target.play();
   }
   }
-  // else we toggle the playing of the video
+  // else handle the click in the content loop.
   else {
-
-  if (element.target.paused == true)
-  {
-    element.target.play();
-  }
-  else { element.target.pause()}
+    // if this is the main content video jump to the exit transition
+   if (element.target.current == element.target.main)
+   {
+     element.target.current += 1;
+     loadNextVideo(element.target);
+     element.target.loop = false;
+     element.target.muted = false;
+     element.target.play();
+   }
  }
 }
 
@@ -86,7 +90,7 @@ function startvideo(element)
 
 }
 
-function addDiv(ablock,parent, aoff) {
+function addDiv(ablock,parent, xoff,yoff) {
    var adiv = document.createElement("div");
 //   adiv.style.border="thick solid #0000FF";
    adiv.style.position = "absolute";
@@ -95,7 +99,7 @@ function addDiv(ablock,parent, aoff) {
    adiv.style.border="thin solid #0000ff";
    adiv.style.background=ablock.color;
    console.log(ablock.color);
-   console.log(aoff);
+   console.log(xoff);
 
    var sizestring = ablock["size"];
    var sizea = sizestring.split(",");
@@ -109,8 +113,8 @@ function addDiv(ablock,parent, aoff) {
    var bx = posea[0];
    var by = posea[1];
 
-   adiv.style.left=bx*10+aoff;
-   adiv.style.top=by*10-bheight;
+   adiv.style.left=bx*10+xoff;
+   adiv.style.top=by*10-bheight+yoff;
    parent.appendChild(adiv);
 
 
@@ -131,6 +135,7 @@ function addDiv(ablock,parent, aoff) {
    avideo.onended = VideoDone;
    avideo.playlist = ablock["vidurl"]
    avideo.current = 0;
+   avideo.main = ablock["main"];
    avideo.loop = true;
    avideo.muted = true;
    avideo.onloadeddata = startvideo;
@@ -153,23 +158,37 @@ function addDiv(ablock,parent, aoff) {
 
 }
 
-  $.getJSON("./divblocks_full.json", function(json) {
-
-walloffset = 0;
 const qstring = window.location.search;
 const urlParams = new URLSearchParams(qstring);
+var divfile = './onecard.json';
 
-   if (urlParams.has('offset') )
+if (urlParams.has('cardfile') )
+{
+  divfile = urlParams.get('cardfile');
+}
+
+  $.getJSON(divfile, function(json) {
+
+wallxoffset = 0;
+wallyoffset = 0;
+
+   if (urlParams.has('xoffset') )
    {
-     var aoff = urlParams.get('offset');
-     walloffset = parseInt(aoff);
+     var aoff = urlParams.get('xoffset');
+     wallxoffset = parseInt(aoff);
+   }
+
+   if (urlParams.has('yoffset') )
+   {
+     var aoff = urlParams.get('yoffset');
+     wallyoffset = parseInt(aoff);
    }
 
     console.log(json); // this will show the info it in firebug console
     var mainstage = document.getElementById("canvas");
     for (let i = 0; i < json.length; i++) {
        console.log(json[i]);
-       addDiv(json[i], mainstage,walloffset);
+       addDiv(json[i], mainstage,wallxoffset, wallyoffset);
     }
 
 
