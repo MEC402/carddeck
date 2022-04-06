@@ -13,8 +13,18 @@
 <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
 <script >
 
+// query options:
+// xoffset - move all videos by x value.
+// yoffset - move all videos down by y value.
+// hideblocks - make all div backgrounds completely transparent.
+// cardfile - the name of the json file that defines the layout.
+// borders - turn on borders for blocks
+
+
 var wallxoffset;
 var wallyoffset;
+var hideblocks = false;
+var noborders = true;
 
 function VideoDone(element)
 {
@@ -92,12 +102,22 @@ function startvideo(element)
 
 function addDiv(ablock,parent, xoff,yoff) {
    var adiv = document.createElement("div");
-//   adiv.style.border="thick solid #0000FF";
+   if (!noborders)
+   {
+     adiv.style.border="thick solid #0000FF";
+   }
    adiv.style.position = "absolute";
    adiv.style.margin=0;
    adiv.style.padding=0;
-   adiv.style.border="thin solid #0000ff";
-   adiv.style.background=ablock.color;
+  // adiv.style.border="thin solid #0000ff";
+   if (hideblocks)
+   {
+      adiv.style.background = "rgba(1.0,0,0,1.0);"
+   }
+   else
+   {
+     adiv.style.background=ablock.color;
+   }
    console.log(ablock.color);
    console.log(xoff);
 
@@ -166,6 +186,7 @@ if (urlParams.has('cardfile') )
 {
   divfile = urlParams.get('cardfile');
 }
+console.log(divfile);
 
   $.getJSON(divfile, function(json) {
 
@@ -182,6 +203,15 @@ wallyoffset = 0;
    {
      var aoff = urlParams.get('yoffset');
      wallyoffset = parseInt(aoff);
+   }
+
+   if (urlParams.has('hideblocks'))
+   {
+     hideblocks = true;
+   }
+   if (urlParams.has('borders'))
+   {
+     noborders = false;
    }
 
     console.log(json); // this will show the info it in firebug console
