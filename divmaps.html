@@ -1,0 +1,187 @@
+<html>
+<style type="text/css">
+     * {
+   pursor: none;
+     }
+     video {
+       object-fit: cover;
+
+     }
+</style>
+
+
+<script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+<script >
+
+var walloffset;
+
+function VideoDone(element)
+{
+   console.log("videodone");
+   // in here we trigger the image to cover the video
+   console.log(element.target.playlist);
+   console.log(element.target.current);
+
+   if (element.target.playlist.length > (element.target.current+1))
+   {
+      element.target.current += 1;
+      element.target.loop = false;
+      loadNextVideo(element.target);
+      element.target.play();
+   }
+   else
+   {
+       element.target.current = 0;
+       element.target.loop = true;
+       element.target.muted = false;
+       loadNextVideo(element.target);
+   }
+
+
+}
+
+function loadNextVideo(avideo)
+{
+   let asource = avideo.firstElementChild;
+   console.log(asource);
+   asource.src=avideo.playlist[avideo.current];
+   asource.type="video/mp4";
+   avideo.load();
+}
+
+
+function showcontents(element)
+{
+  console.log("showcontents");
+  // handle the first click
+  // if first video trigger next video
+   if (element.target.current == 0)
+  {
+    if (element.target.playlist.length > (element.target.current+1))
+    {
+
+    element.target.current += 1;
+    loadNextVideo(element.target);
+    element.target.loop = false;
+    element.target.muted = false;
+    element.target.play();
+  }
+  }
+  // else we toggle the playing of the video
+  else {
+
+  if (element.target.paused == true)
+  {
+    element.target.play();
+  }
+  else { element.target.pause()}
+ }
+}
+
+function startvideo(element)
+{
+  console.log("startvideo");
+  console.log(element);
+     element.target.play();
+
+}
+
+function addDiv(ablock,parent, aoff) {
+   var adiv = document.createElement("div");
+//   adiv.style.border="thick solid #0000FF";
+   adiv.style.position = "absolute";
+   adiv.style.margin=0;
+   adiv.style.padding=0;
+   adiv.style.border="thin solid #0000ff";
+   adiv.style.background=ablock.color;
+   console.log(ablock.color);
+   console.log(aoff);
+
+   var sizestring = ablock["size"];
+   var sizea = sizestring.split(",");
+   var bwidth = sizea[0]*10;
+   var bheight = sizea[1]*10;
+   adiv.style.width=bwidth;
+   adiv.style.height=bheight;
+
+   var posstring = ablock["xy"];
+   var posea = posstring.split(",");
+   var bx = posea[0];
+   var by = posea[1];
+
+   adiv.style.left=bx*10+aoff;
+   adiv.style.top=by*10-bheight;
+   parent.appendChild(adiv);
+
+
+
+   // how the sequence works:
+   // load first video in list and have it start playing.
+   // when tapped move to second video which is assumed to be the transition video.
+   // at end of final video move on to the first video and continue playing.
+   if ("vidurl" in ablock)
+   {
+   var avideo = document.createElement("video");
+   var asource = document.createElement("source");
+   asource.src=ablock["vidurl"][0]
+   asource.type="video/webm";
+   avideo.width=bwidth;
+   avideo.preload='auto';
+//   avideo.style.object-fit='cover';
+   avideo.onended = VideoDone;
+   avideo.playlist = ablock["vidurl"]
+   avideo.current = 0;
+   avideo.loop = true;
+   avideo.muted = true;
+   avideo.onloadeddata = startvideo;
+
+//   avideo.controls = true;
+   asource.width=bwidth;
+   avideo.height = bheight;
+   avideo.appendChild(asource);
+   adiv.appendChild(avideo);
+   adiv.onclick=showcontents;
+
+   }
+   else
+   {
+     //adiv.onclick=showcontents;
+   }
+
+
+
+
+}
+
+  $.getJSON("./divblocks_full.json", function(json) {
+
+walloffset = 0;
+const qstring = window.location.search;
+const urlParams = new URLSearchParams(qstring);
+
+   if (urlParams.has('offset') )
+   {
+     var aoff = urlParams.get('offset');
+     walloffset = parseInt(aoff);
+   }
+
+    console.log(json); // this will show the info it in firebug console
+    var mainstage = document.getElementById("canvas");
+    for (let i = 0; i < json.length; i++) {
+       console.log(json[i]);
+       addDiv(json[i], mainstage,walloffset);
+    }
+
+
+   });
+
+
+</script>
+
+<body >
+<div id="canvas">
+</div>
+
+</body>
+
+</html>
