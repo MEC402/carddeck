@@ -25,6 +25,8 @@ var wallxoffset;
 var wallyoffset;
 var hideblocks = false;
 var noborders = true;
+var scalefactorx = 1.0;
+var scalefactory = 1.0;
 
 function VideoDone(element)
 {
@@ -123,8 +125,8 @@ function addDiv(ablock,parent, xoff,yoff) {
 
    var sizestring = ablock["size"];
    var sizea = sizestring.split(",");
-   var bwidth = sizea[0]*10;
-   var bheight = sizea[1]*10;
+   var bwidth = sizea[0]*10*scalefactorx;
+   var bheight = sizea[1]*10*scalefactory;
    adiv.style.width=bwidth;
    adiv.style.height=bheight;
 
@@ -133,8 +135,8 @@ function addDiv(ablock,parent, xoff,yoff) {
    var bx = posea[0];
    var by = posea[1];
 
-   adiv.style.left=bx*10+xoff;
-   adiv.style.top=by*10-bheight+yoff;
+   adiv.style.left=bx*10*scalefactorx+xoff;
+   adiv.style.top=by*10*scalefactory-bheight+yoff;
    parent.appendChild(adiv);
 
 
@@ -212,6 +214,16 @@ wallyoffset = 0;
    if (urlParams.has('borders'))
    {
      noborders = false;
+   }
+   if (urlParams.has('scalefactorx') )
+   {
+     var aoff = urlParams.get('scalefactorx');
+     scalefactorx = parseFloat(aoff);
+   }
+   if (urlParams.has('scalefactory') )
+   {
+     var aoff = urlParams.get('scalefactory');
+     scalefactory = parseInt(aoff);
    }
 
     console.log(json); // this will show the info it in firebug console
